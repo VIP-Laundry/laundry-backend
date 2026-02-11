@@ -28,10 +28,7 @@ func ConnectDB(cfg *config.Config) (*sql.DB, error) {
 	db.SetMaxIdleConns(cfg.DB.MaxIdleConns)
 	db.SetMaxOpenConns(cfg.DB.MaxOpenConns)
 
-	lifetime, err := time.ParseDuration(cfg.DB.ConnMaxLifetime)
-	if err != nil {
-		lifetime = time.Hour
-	}
+	lifetime := time.Duration(cfg.DB.MaxLifetimeMin) * time.Minute
 	db.SetConnMaxLifetime(lifetime)
 
 	err = db.Ping()
