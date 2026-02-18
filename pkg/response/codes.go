@@ -1,26 +1,45 @@
 package response
 
-// Standardized Error Codes for the Application.
-// Frontend can use these strings to determine logic flow (e.g., show login modal if UNAUTHORIZED).
+import "errors"
+
+// ============================================
+// 1. STRING CODES (Untuk Frontend/JSON)
+// ============================================
+// Kita gunakan prefix 'Msg' agar tidak tertukar dengan objek error.
+// Ini menjaga agar Modul Auth atau bagian lain yang butuh string tetap aman.
 const (
+	CodeValidation     = "VALIDATION_ERROR"
+	CodeUnauthorized   = "UNAUTHORIZED_ACCESS"
+	CodeForbidden      = "FORBIDDEN_ACCESS"
+	CodeNotFound       = "RESOURCE_NOT_FOUND"
+	CodeDuplicate      = "DUPLICATE_DATA"
+	CodeRateLimit      = "RATE_LIMIT_EXCEEDED"
+	CodeInternalServer = "INTERNAL_SERVER_ERROR"
 
-	// ============================================
-	// 1. GENERAL ERRORS (Masalah Umum)
-	// ============================================
-	ErrValidation     = "VALIDATION_ERROR"      // ErrValidation: Input data is missing or invalid format. (400 Bad Request)
-	ErrUnauthorized   = "UNAUTHORIZED_ACCESS"   // ErrUnauthorized: Missing or invalid authentication token. (401 Unauthorized)
-	ErrForbidden      = "FORBIDDEN_ACCESS"      // ErrForbidden: Authenticated but insufficient permissions (e.g., User accessing Owner menu). (403 Forbidden)
-	ErrNotFound       = "RESOURCE_NOT_FOUND"    // ErrNotFound: The requested resource ID was not found in database. (404 Not Found)
-	ErrDuplicate      = "DUPLICATE_DATA"        // ErrDuplicate: Unique constraint violation (e.g., Email/Username already exists). (409 Conflict)
-	ErrRateLimit      = "RATE_LIMIT_EXCEEDED"   // ErrRateLimit: Too many requests sent in short period. (429 Too Many Requests)
-	ErrInternalServer = "INTERNAL_SERVER_ERROR" // ErrInternal: Unexpected server or database failure. (500 Internal Server Error)
+	CodeInvalidCredentials = "INVALID_CREDENTIALS"
+	CodeAccountInactive    = "ACCOUNT_INACTIVE"
+	CodeTokenExpired       = "TOKEN_EXPIRED"
+	CodeInvalidToken       = "INVALID_TOKEN"
+	CodeUserNotFound       = "USER_NOT_FOUND"
+)
 
-	// ============================================
-	// 2. AUTH SPECIFIC ERRORS (Masalah Login)
-	// ============================================
-	ErrInvalidCredentials = "INVALID_CREDENTIALS"
-	ErrAccountInactive    = "ACCOUNT_INACTIVE"
-	ErrTokenExpired       = "TOKEN_EXPIRED"
-	ErrInvalidToken       = "INVALID_TOKEN"
-	ErrUserNotFound       = "USER_NOT_FOUND"
+// ============================================
+// 2. SENTINEL ERRORS (Untuk Internal Go/Repository/Service)
+// ============================================
+// Ini yang akan kita kembalikan di fungsi return.
+// Mengikuti standar E (Error Handling) & O (Optimal Go Practice).
+var (
+	ErrValidation     = errors.New(CodeValidation)
+	ErrUnauthorized   = errors.New(CodeUnauthorized)
+	ErrForbidden      = errors.New(CodeForbidden)
+	ErrNotFound       = errors.New(CodeNotFound)
+	ErrDuplicate      = errors.New(CodeDuplicate)
+	ErrRateLimit      = errors.New(CodeRateLimit)
+	ErrInternalServer = errors.New(CodeInternalServer)
+
+	ErrInvalidCredentials = errors.New(CodeInvalidCredentials)
+	ErrAccountInactive    = errors.New(CodeAccountInactive)
+	ErrTokenExpired       = errors.New(CodeTokenExpired)
+	ErrInvalidToken       = errors.New(CodeInvalidToken)
+	ErrUserNotFound       = errors.New(CodeUserNotFound)
 )

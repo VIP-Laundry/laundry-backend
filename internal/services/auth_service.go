@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"laundry-backend/internal/config"
@@ -44,18 +43,18 @@ func (s *authService) AuthenticateUser(ctx context.Context, req dto.LoginRequest
 	user, err := s.userRepo.FindByUsername(ctx, req.Username)
 	if err != nil {
 		// Return generic error for security (avoid username enumeration)
-		return nil, errors.New(response.ErrInvalidCredentials)
+		return nil, response.ErrInvalidCredentials
 	}
 
 	// 2. Verify password using the new Utils
 	err = utils.VerifyPassword(user.PasswordHash, req.Password)
 	if err != nil {
-		return nil, errors.New(response.ErrInvalidCredentials)
+		return nil, response.ErrInvalidCredentials
 	}
 
 	// 3. Guard: Check if account is active
 	if !user.IsActive {
-		return nil, errors.New(response.ErrAccountInactive)
+		return nil, response.ErrAccountInactive
 	}
 
 	// [PERUBAHAN BESAR DISINI]
@@ -120,18 +119,18 @@ func (s *authService) RenewUserSession(ctx context.Context, req dto.RefreshToken
 	storedToken, err := s.authRepo.GetRefreshToken(ctx, req.RefreshToken)
 	if err != nil {
 		// "RESOURCE_NOT_FOUND" from repo maps to invalid token here
-		return nil, errors.New(response.ErrInvalidToken)
+		return nil, response.ErrInvalidToken
 	}
 
 	// 2. Check Expiration
 	if storedToken.ExpiresAt.Before(time.Now()) {
-		return nil, errors.New(response.ErrTokenExpired)
+		return nil, response.ErrTokenExpired
 	}
 
 	// 3. Retrieve User Data (Ensure user still exists/active)
 	user, err := s.userRepo.FindByID(ctx, storedToken.UserID)
 	if err != nil {
-		return nil, errors.New(response.ErrUserNotFound)
+		return nil, response.ErrUserNotFound
 	}
 
 	// [PERUBAHAN BESAR DISINI JUGA]
@@ -161,7 +160,7 @@ func (s *authService) RevokeUserSession(ctx context.Context, refreshToken string
 	}
 
 	if storedToken.UserID != userID {
-		return errors.New(response.ErrUnauthorized)
+		return response.ErrUnauthorized
 	}
 
 	_ = s.authRepo.DeleteRefreshToken(ctx, refreshToken)
@@ -185,7 +184,7 @@ func (s *authService) GetAccountProfile(ctx context.Context, userID int64) (*dto
 
 	// 2. Guard: Active Status
 	if !user.IsActive {
-		return nil, errors.New(response.ErrAccountInactive)
+		return nil, response.ErrAccountInactive
 	}
 
 	// 3. Format Dates

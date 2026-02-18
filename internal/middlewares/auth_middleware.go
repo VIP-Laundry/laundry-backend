@@ -21,7 +21,8 @@ func AuthMiddleware(authRepo repositories.AuthRepository, cfg *config.Config) gi
 		// 2. Cek apakah header kosong atau format salah
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			// REFACTOR: Pakai Helper
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrUnauthorized, "Unauthorized: Missing or invalid token format", "Authorization header is required")
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeUnauthorized, "Unauthorized: Missing or invalid token format", "Authorization header is required")
+			c.Abort()
 			return
 		}
 
@@ -34,7 +35,7 @@ func AuthMiddleware(authRepo repositories.AuthRepository, cfg *config.Config) gi
 		// 4. Validasi token menggunakan jwt_utils yang sudah kita buat
 		claims, err := utils.ValidateAccessToken(tokenString, secretKey)
 		if err != nil {
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrInvalidToken, "Unauthorized: Invalid or expired token", err.Error())
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeInvalidToken, "Unauthorized: Invalid or expired token", err.Error())
 			c.Abort()
 			return
 		}
@@ -43,14 +44,16 @@ func AuthMiddleware(authRepo repositories.AuthRepository, cfg *config.Config) gi
 		isBlacklisted, err := authRepo.IsBlacklisted(c.Request.Context(), claims.ID)
 		if err != nil {
 			// REFACTOR: Pakai Helper
-			response.ErrorResponse(c, http.StatusInternalServerError, response.ErrInternalServer, "Internal server error during auth check", nil)
+			response.ErrorResponse(c, http.StatusInternalServerError, response.CodeInternalServer, "Internal server error during auth check", nil)
+			c.Abort()
 			return
 		}
 
 		if isBlacklisted {
 			// REFACTOR: Pakai Helper (Bisa pakai ErrUnauthorized atau bikin ErrTokenBlacklisted di codes.go)
 			// Disini kita pakai ErrUnauthorized agar aman
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrUnauthorized, "Unauthorized: Token has been logged out", "Please login again")
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeUnauthorized, "Unauthorized: Token has been logged out", "Please login again")
+			c.Abort()
 			return
 		}
 

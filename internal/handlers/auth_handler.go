@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"laundry-backend/internal/dto"
 	"laundry-backend/internal/services"
 	"laundry-backend/pkg/response"
@@ -29,7 +30,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// 1. Validate Input
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.ErrorResponse(c, http.StatusBadRequest, response.ErrValidation, "Invalid input format", err.Error())
+		response.ErrorResponse(c, http.StatusBadRequest, response.CodeValidation, "Invalid input format", err.Error())
 		return
 	}
 
@@ -37,13 +38,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	res, err := h.authService.AuthenticateUser(c.Request.Context(), req)
 	if err != nil {
 		// Mapping Error string dari Service ke response.ErrorResponse
-		switch err.Error() {
-		case response.ErrInvalidCredentials:
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrInvalidCredentials, "Invalid username or password", nil)
-		case response.ErrAccountInactive:
-			response.ErrorResponse(c, http.StatusForbidden, response.ErrAccountInactive, "Your account is inactive", nil)
-		default:
-			response.ErrorResponse(c, http.StatusInternalServerError, response.ErrInternalServer, "An unexpected error occurred", err.Error())
+		if errors.Is(err, response.ErrInvalidCredentials) {
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeInvalidCredentials, "Invalid username or password", nil)
+		} else if errors.Is(err, response.ErrAccountInactive) {
+			response.ErrorResponse(c, http.StatusForbidden, response.CodeAccountInactive, "Your account is inactive", nil)
+		} else {
+			response.ErrorResponse(c, http.StatusInternalServerError, response.CodeInternalServer, "An unexpected error occurred", nil)
 		}
 		return
 	}
@@ -61,22 +61,21 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 
 	// 1. Validate Input
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.ErrorResponse(c, http.StatusBadRequest, response.ErrValidation, "Refresh token is required", err.Error())
+		response.ErrorResponse(c, http.StatusBadRequest, response.CodeValidation, "Refresh token is required", err.Error())
 		return
 	}
 
 	// 2. Call Service
 	res, err := h.authService.RenewUserSession(c.Request.Context(), req)
 	if err != nil {
-		switch err.Error() {
-		case response.ErrInvalidToken:
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrInvalidToken, "Invalid or revoked token", nil)
-		case response.ErrTokenExpired:
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrTokenExpired, "Session expired, please login again", nil)
-		case response.ErrUserNotFound:
-			response.ErrorResponse(c, http.StatusUnauthorized, response.ErrUserNotFound, "User account not found", nil)
-		default:
-			response.ErrorResponse(c, http.StatusInternalServerError, response.ErrInternalServer, "An unexpected error occurred", err.Error())
+		if errors.Is(err, response.ErrInvalidToken) {
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeInvalidToken, "Invalid or revoked token", nil)
+		} else if errors.Is(err, response.ErrTokenExpired) {
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeTokenExpired, "Session expired, please login again", nil)
+		} else if errors.Is(err, response.ErrUserNotFound) {
+			response.ErrorResponse(c, http.StatusUnauthorized, response.CodeUserNotFound, "User account not found", nil)
+		} else {
+			response.ErrorResponse(c, http.StatusInternalServerError, response.CodeInternalServer, "An unexpected error occurred", nil)
 		}
 		return
 	}
@@ -94,7 +93,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 	// 1. Bind Refresh Token from Body
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.ErrorResponse(c, http.StatusBadRequest, response.ErrValidation, "Refresh token is required for logout", err.Error())
+		response.ErrorResponse(c, http.StatusBadRequest, response.CodeValidation, "Refresh token is required for logout", err.Error())
 		return
 	}
 
@@ -104,7 +103,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	userID, existsUserID := c.Get("user_id")
 
 	if !existsJti || !existsExp || !existsUserID {
-		response.ErrorResponse(c, http.StatusUnauthorized, response.ErrUnauthorized, "Invalid session context", nil)
+		response.ErrorResponse(c, http.StatusUnauthorized, response.CodeUnauthorized, "Invalid session context", nil)
 		return
 	}
 
@@ -113,13 +112,13 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 	if err != nil {
 		// Handle Security Check (Jika mencoba logout token orang lain)
-		if err.Error() == response.ErrUnauthorized {
-			response.ErrorResponse(c, http.StatusForbidden, response.ErrForbidden, "You cannot logout another user's session", nil)
+		if errors.Is(err, response.ErrUnauthorized) {
+			response.ErrorResponse(c, http.StatusForbidden, response.CodeForbidden, "You cannot logout another user's session", nil)
 			return
 		}
 
 		// Handle error umum lainnya
-		response.ErrorResponse(c, http.StatusInternalServerError, response.ErrInternalServer, "Failed to process logout", err.Error())
+		response.ErrorResponse(c, http.StatusInternalServerError, response.CodeInternalServer, "Failed to process logout", nil)
 		return
 	}
 
@@ -135,19 +134,19 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 	// 1. Extract UserID from Context (Set by Middleware)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		response.ErrorResponse(c, http.StatusUnauthorized, response.ErrUnauthorized, "User context missing", nil)
+		response.ErrorResponse(c, http.StatusUnauthorized, response.CodeUnauthorized, "User context missing", nil)
 		return
 	}
 
 	// 2. Call Service
 	res, err := h.authService.GetAccountProfile(c.Request.Context(), userID.(int64))
 	if err != nil {
-		if err.Error() == response.ErrAccountInactive {
-			response.ErrorResponse(c, http.StatusForbidden, response.ErrAccountInactive, "Your account is inactive", nil)
+		if errors.Is(err, response.ErrAccountInactive) {
+			response.ErrorResponse(c, http.StatusForbidden, response.CodeAccountInactive, "Your account is inactive", nil)
 			return
 		}
 
-		response.ErrorResponse(c, http.StatusInternalServerError, response.ErrInternalServer, "Failed to retrieve profile", err.Error())
+		response.ErrorResponse(c, http.StatusInternalServerError, response.CodeInternalServer, "Failed to retrieve profile", nil)
 		return
 	}
 
