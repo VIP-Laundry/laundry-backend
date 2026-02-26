@@ -12,7 +12,7 @@ import (
 )
 
 func ConnectDB(cfg *config.Config) (*sql.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&loc=Asia%%2FJakarta",
 		cfg.DB.User,
 		cfg.DB.Password,
 		cfg.DB.Host,
