@@ -47,9 +47,11 @@ func main() {
 
 	// B. Service Layer (Business Logic)
 	authService := services.NewAuthService(authRepo, userRepo, cfg)
+	userService := services.NewUserService(userRepo)
 
 	// C. Handler Layer (HTTP Transport)
 	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// ==========================================
 	// 4. SETUP SERVER & ROUTES
@@ -63,6 +65,7 @@ func main() {
 
 	// Daftarkan Module Auth
 	routes.SetupAuthRoutes(v1, authHandler, authRepo, cfg)
+	routes.SetupUserRoutes(v1, userHandler, authRepo, cfg)
 
 	// ==========================================
 	// 5. START THE SERVER
