@@ -31,88 +31,90 @@ Authorization: Bearer <token>
 
 ### Auths
 
-- POST /api/auth/login
+- POST /api/v1/auth/login
 
-- POST /api/auth/logout
+- POST /api/v1/auth/refresh-token
 
-- GET /api/auth/me
+- POST /api/v1/auth/logout
+
+- GET /api/v1/auth/me
 
 ### Users
 
-- POST /api/users
+- POST /api/v1/users
 
-- GET /api/users
+- GET /api/v1/users
 
-- GET /api/users/{id}
+- GET /api/v1/users/{id}
 
-- PUT /api/users/{id}
+- PUT /api/v1/users/{id}
 
-- DELETE /api/users/{id}
+- DELETE /api/v1/users/{id}
 
 ### Service Categories
 
-- POST /api/categories
+- POST /api/v1/categories
 
-- GET /api/categories
+- GET /api/v1/categories
 
-- GET /api/categories/{id}
+- GET /api/v1/categories/{id}
 
-- PUT /api/categories/{id}
+- PUT /api/v1/categories/{id}
 
-- DELETE /api/categories/{id}
+- DELETE /api/v1/categories/{id}
 
 ### Services
 
-- POST /api/services
+- POST /api/v1/services
 
-- GET /api/services
+- GET /api/v1/services
 
-- GET /api/services/{id}
+- GET /api/v1/services/{id}
 
-- PUT /api/services/{id}
+- PUT /api/v1/services/{id}
 
-- DELETE /api/services/{id}
+- DELETE /api/v1/services/{id}
 
 ### Orders
 
-- POST /api/orders
+- POST /api/v1/orders
 
-- GET /api/orders
+- GET /api/v1/orders
 
-- GET /api/orders/{id}
+- GET /api/v1/orders/{id}
 
-- PUT /api/orders/{id}
+- PUT /api/v1/orders/{id}
 
-- PATCH /api/orders/{id}
+- PATCH /api/v1/orders/{id}
 
 ### Payments
 
-- GET /api/payments
+- GET /api/v1/payments
 
-- GET /api/payments/{id}
+- GET /api/v1/payments/{id}
 
-- PATCH /api/payments/{id}
+- PATCH /api/v1/payments/{id}
 
 ### Deliveries
 
-- GET /api/deliveries
+- GET /api/v1/deliveries
 
-- GET /api/deliveries/{id}
+- GET /api/v1/deliveries/{id}
 
-- GET /api/deliveries/my-tasks
+- GET /api/v1/deliveries/my-tasks
 
-- PATCH /api/deliveries/{id}
+- PATCH /api/v1/deliveries/{id}
 
 ### Customer (Endpoint Public Tracking)
 
-- GET /api/orders/track/{invoice_number}
+- GET /api/v1/orders/track/{invoice_number}
 
 ### Reports
 
-- GET /api/reports/dashboard
+- GET /api/v1/reports/dashboard
 
-- GET /api/reports/revenue
+- GET /api/v1/reports/revenue
 
-- GET /api/reports/payments
+- GET /api/v1/reports/payments
 
-- GET /api/reports/employees
+- GET /api/v1/reports/employees
