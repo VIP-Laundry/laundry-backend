@@ -44,14 +44,17 @@ func main() {
 	// A. Repository Layer (Data Access)
 	userRepo := repositories.NewUserRepository(dbConn)
 	authRepo := repositories.NewAuthRepository(dbConn)
+	categoryRepo := repositories.NewCategoryRepository(dbConn)
 
 	// B. Service Layer (Business Logic)
 	authService := services.NewAuthService(authRepo, userRepo, cfg)
 	userService := services.NewUserService(userRepo)
+	categoryService := services.NewCategoryService(categoryRepo)
 
 	// C. Handler Layer (HTTP Transport)
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
 	// ==========================================
 	// 4. SETUP SERVER & ROUTES
@@ -66,6 +69,7 @@ func main() {
 	// Daftarkan Module Auth
 	routes.SetupAuthRoutes(v1, authHandler, authRepo, cfg)
 	routes.SetupUserRoutes(v1, userHandler, authRepo, cfg)
+	routes.SetupCategoryRoutes(v1, categoryHandler, authRepo, cfg)
 
 	// ==========================================
 	// 5. START THE SERVER
