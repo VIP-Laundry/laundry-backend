@@ -29,6 +29,24 @@ ENGINE=InnoDB
 AUTO_INCREMENT=6
 ;
 
+-- 2. Tabel CUSTOMERS (Pelanggan)
+CREATE TABLE `customers` (
+	`id` BIGINT(19) NOT NULL AUTO_INCREMENT,
+	`full_name` VARCHAR(150) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`phone_number` VARCHAR(30) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`address` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`is_active` TINYINT(1) NULL DEFAULT '1',
+	`created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+	`updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `phone` (`phone_number`) USING BTREE,
+	INDEX `idx_customers_name` (`full_name`) USING BTREE
+)
+COLLATE='utf8mb4_0900_ai_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=2
+;
+
 -- 8. Tabel ORDER ITEMS (Rincian Cucian)
 CREATE TABLE `order_items` (
 	`id` BIGINT(19) NOT NULL AUTO_INCREMENT,
