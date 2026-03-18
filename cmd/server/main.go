@@ -42,19 +42,22 @@ func main() {
 	fmt.Println("3. Merakit komponen internal (Dependency Injection)...")
 
 	// A. Repository Layer (Data Access)
-	userRepo := repositories.NewUserRepository(dbConn)
 	authRepo := repositories.NewAuthRepository(dbConn)
+	userRepo := repositories.NewUserRepository(dbConn)
 	categoryRepo := repositories.NewCategoryRepository(dbConn)
+	serviceRepo := repositories.NewServiceRepository(dbConn)
 
 	// B. Service Layer (Business Logic)
 	authService := services.NewAuthService(authRepo, userRepo, cfg)
 	userService := services.NewUserService(userRepo)
 	categoryService := services.NewCategoryService(categoryRepo)
+	serviceService := services.NewServiceService(serviceRepo)
 
 	// C. Handler Layer (HTTP Transport)
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	serviceHandler := handlers.NewServiceHandler(serviceService)
 
 	// ==========================================
 	// 4. SETUP SERVER & ROUTES
@@ -70,6 +73,7 @@ func main() {
 	routes.SetupAuthRoutes(v1, authHandler, authRepo, cfg)
 	routes.SetupUserRoutes(v1, userHandler, authRepo, cfg)
 	routes.SetupCategoryRoutes(v1, categoryHandler, authRepo, cfg)
+	routes.SetupServiceRoutes(v1, serviceHandler, authRepo, cfg)
 
 	// ==========================================
 	// 5. START THE SERVER
